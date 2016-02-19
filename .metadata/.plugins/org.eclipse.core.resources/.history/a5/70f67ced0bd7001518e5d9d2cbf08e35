@@ -1,0 +1,13 @@
+/*
+ * wlan_mac_chan_util.h
+ *
+ *  Created on: Feb 19, 2016
+ *      Author: gabri
+ */
+
+#ifndef WLAN_MAC_CHAN_UTIL_H_
+#define WLAN_MAC_CHAN_UTIL_H_
+
+
+
+#endif /* WLAN_MAC_CHAN_UTIL_H_ */
