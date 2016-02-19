@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">&#x0A;<refactoring comment="Rename resource &apos;wlan_chan_util&apos; to &apos;wlan_mac_chan_util&apos;" description="Rename resource &apos;wlan_chan_util&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="/wlan_chan_util" name="wlan_mac_chan_util" stamp="1455885855136" updateReferences="true"/>&#x0A;<refactoring comment="Rename resource &apos;wlan_mac_chan_util&apos; to &apos;wlan_mac_chan_util_avg&apos;" description="Rename resource &apos;wlan_mac_chan_util&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="/wlan_mac_chan_util" name="wlan_mac_chan_util_avg" stamp="1455885907301" updateReferences="true"/>
+</session>

@@ -1,0 +1,53 @@
+13:43:19 **** Build of configuration Debug for project wlan_chan_util ****
+make all 
+Building file: ../main.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"main.d" -MT"main.d" -o "main.o" "../main.c"
+../main.c: In function ‘test1’:
+../main.c:47:6: warning: unused variable ‘max_users’ [-Wunused-variable]
+  u32 max_users = 5;
+      ^
+Finished building: ../main.c
+ 
+Building file: ../wlan_mac_chan_util.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"wlan_mac_chan_util.d" -MT"wlan_mac_chan_util.d" -o "wlan_mac_chan_util.o" "../wlan_mac_chan_util.c"
+../wlan_mac_chan_util.c: In function ‘wlan_mac_high_refresh_chan_info’:
+../wlan_mac_chan_util.c:61:5: warning: unused variable ‘num_elem’ [-Wunused-variable]
+  u8 num_elem;
+     ^
+../wlan_mac_chan_util.c: In function ‘print_mpdu_info’:
+../wlan_mac_chan_util.c:262:4: warning: format ‘%d’ expects argument of type ‘int’, but argument 3 has type ‘u64’ [-Wformat=]
+    fprintf(stdout,"%05d - ", mpdu_info->mpdu_entries[counter].time_stamp);
+    ^
+../wlan_mac_chan_util.c: In function ‘print_chan_info’:
+../wlan_mac_chan_util.c:293:6: warning: format ‘%d’ expects argument of type ‘int’, but argument 10 has type ‘u32’ [-Wformat=]
+      chan_info->user_entries[counter].num_mpdu[2]);
+      ^
+../wlan_mac_chan_util.c:293:6: warning: format ‘%d’ expects argument of type ‘int’, but argument 11 has type ‘u32’ [-Wformat=]
+../wlan_mac_chan_util.c:293:6: warning: format ‘%d’ expects argument of type ‘int’, but argument 12 has type ‘u32’ [-Wformat=]
+../wlan_mac_chan_util.c: In function ‘print_chan_util’:
+../wlan_mac_chan_util.c:314:2: warning: format ‘%d’ expects argument of type ‘int’, but argument 3 has type ‘u32’ [-Wformat=]
+  fprintf(stdout,"Channel:            %d\n", mac_channel);
+  ^
+../wlan_mac_chan_util.c:322:6: warning: format ‘%d’ expects argument of type ‘int’, but argument 10 has type ‘u32’ [-Wformat=]
+      chan_info->user_entries[counter].avg_mpdus);
+      ^
+../wlan_mac_chan_util.c: In function ‘print_users’:
+../wlan_mac_chan_util.c:430:5: warning: format ‘%d’ expects argument of type ‘int’, but argument 3 has type ‘u32’ [-Wformat=]
+     users[counter].addr[3], users[counter].addr[4],users[counter].addr[5]);
+     ^
+../wlan_mac_chan_util.c: In function ‘generate_mpdu_entries’:
+../wlan_mac_chan_util.c:444:3: warning: format ‘%d’ expects argument of type ‘int’, but argument 3 has type ‘u32’ [-Wformat=]
+   fprintf(stdout,"User index: %d\n", idx+1);
+   ^
+Finished building: ../wlan_mac_chan_util.c
+ 
+Building target: wlan_chan_util
+Invoking: GCC C Linker
+gcc  -o "wlan_chan_util"  ./main.o ./wlan_mac_chan_util.o   
+Finished building target: wlan_chan_util
+ 
+13:43:30 **** Incremental Build of configuration Debug for project wlan_chan_util ****
+make all 
+make: Nothing to be done for `all'.
