@@ -29,6 +29,7 @@ typedef struct{
 	mac_addr	dst_addr;							/// Destination MAC addresses
 	u64			time_stamp;							/// Time stamp of the reception
 	char		power;								/// Received power values
+	u16			duration;
 	u16			length;								/// Length of the MPDU in bytes
 	u8			mcs;								/// MCS
 	u8			fcs;								/// FCS
@@ -42,7 +43,10 @@ typedef struct{
 typedef struct{
 	mac_addr	user_mac;							/// User MAC address
 	u32			num_mpdu[3];						/// Number of MPDUs transmitted
+	u16			duration[3];
+	char		last_power;
 	u32			avg_mpdus;
+	u16			avg_duration;
 }user_entry;
 
 typedef struct{
@@ -66,6 +70,7 @@ int  get_mac_channel_index(u32 mac_channel);
 void get_mac_chan_util(rx_mpdu_info* mpdu_info, mac_chan_info* chan_info, u32 mac_chan);
 void copy_user_entry(const user_entry in, user_entry* out);
 void get_avg_mpdu(user_entry* user);
+void get_avg_duration(user_entry* user);
 void remove_inactive_users(mac_chan_info* chan_info);
 void remove_user_at_index(mac_chan_info* chan_info, u16 index);
 

@@ -41,9 +41,11 @@ void wlan_mac_high_init_chan_info(mac_chan_info* chan_info){
 	u8 counter;
 	u8 num_elem;
 	for(counter = 0; counter < MAX_NUM_USER; counter++) {
+		chan_info->user_entries[counter].avg_mpdus = 0;
+		chan_info->user_entries[counter].avg_duration = 0;
 		for(num_elem = 0; num_elem < 3; num_elem++) {
 			chan_info->user_entries[counter].num_mpdu[num_elem] = 0;
-			chan_info->user_entries[counter].avg_mpdus = 0;
+			chan_info->user_entries[counter].duration[num_elem] = 0;
 		}
 
 	}
@@ -53,6 +55,7 @@ void wlan_mac_high_reset_chan_info(mac_chan_info* chan_info){
 	u8 counter;
 	for(counter = 0; counter < MAX_NUM_USER; counter++){
 		chan_info->user_entries[counter].avg_mpdus = 0;
+		chan_info->user_entries[counter].avg_duration = 0;
 	}
 }
 
@@ -62,6 +65,7 @@ void wlan_mac_high_refresh_chan_info(mac_chan_info* chan_info){
 	u16 num_users = chan_info->num_users;
 	for(counter = 0; counter < num_users; counter++) {
 		chan_info->user_entries[counter].num_mpdu[chan_info->num_elem] = 0;
+		chan_info->user_entries[counter].duration[chan_info->num_elem] = 0;
 	}
 }
 
@@ -78,9 +82,13 @@ void set_mac_chan_info(rx_mpdu_info* mpdu_info, mac_chan_info* chan_info){
 
 		if(idx != -1) {
 			chan_info->user_entries[idx].num_mpdu[chan_info->num_elem]++;
+			chan_info->user_entries[idx].duration[chan_info->num_elem] = mpdu_info->mpdu_entries[counter].duration;
+			chan_info->user_entries[idx].last_power = mpdu_info->mpdu_entries[counter].power;
 		} else {
 			memcpy(&((chan_info->user_entries[num_users].user_mac).addr[0]), &(src_mac_mpdu.addr[0]), 6 * sizeof(u8));
 			chan_info->user_entries[num_users].num_mpdu[chan_info->num_elem]++;
+			chan_info->user_entries[num_users].duration[chan_info->num_elem] = mpdu_info->mpdu_entries[counter].duration;
+			chan_info->user_entries[num_users].last_power = mpdu_info->mpdu_entries[counter].power;
 			num_users++;
 		}
 	}
@@ -188,6 +196,15 @@ void get_avg_mpdu(user_entry* user) {
 	user->avg_mpdus =  (sum / 3);		//Need to round
 }
 
+void get_avg_duration(user_entry* user) {
+	u8 index;
+	u16 sum = 0;
+	for(index = 0; index < 3; index++) {
+		sum += user->duration[index];
+	}
+	user->avg_duration = (sum / 3);
+}
+
 /**
  * @brief Calculate the number of users which are transmitting over the channel
  *        and number of MPDUs per second for each independent user
@@ -212,6 +229,7 @@ void get_mac_chan_util(rx_mpdu_info* mpdu_info, mac_chan_info* chan_info, u32 ma
 	u16 counter;
 	for(counter = 0; counter < chan_info->num_users; counter++){
 		get_avg_mpdu(&(chan_info->user_entries[counter]));
+		get_avg_duration(&(chan_info->user_entries[counter]));
 	}
 
 	//Debug
@@ -261,12 +279,13 @@ void print_mpdu_info(rx_mpdu_info* mpdu_info){
 			memcpy(&dst_mac.addr[0], &((mpdu_info->mpdu_entries[counter].dst_addr).addr[0]), 6 * sizeof(u8));
 			fprintf(stdout,"%05d - ", mpdu_info->mpdu_entries[counter].time_stamp);
 			fprintf(stdout,"Prx=%d dBm -> ", mpdu_info->mpdu_entries[counter].power);
+			fprintf(stdout,"time=%d - ", mpdu_info->mpdu_entries[counter].duration);
 			fprintf(stdout,"Src: %02x:%02x:%02x:%02x:%02x:%02x -> ",
-					    src_mac.addr[0], src_mac.addr[1], src_mac.addr[2],
-					    src_mac.addr[3], src_mac.addr[4], src_mac.addr[5]);
+					src_mac.addr[0], src_mac.addr[1], src_mac.addr[2],
+					src_mac.addr[3], src_mac.addr[4], src_mac.addr[5]);
 			fprintf(stdout,"Dst: %02x:%02x:%02x:%02x:%02x:%02x - ",
-					    dst_mac.addr[0], dst_mac.addr[1], dst_mac.addr[2],
-					    dst_mac.addr[3], dst_mac.addr[4], dst_mac.addr[5]);
+					dst_mac.addr[0], dst_mac.addr[1], dst_mac.addr[2],
+					dst_mac.addr[3], dst_mac.addr[4], dst_mac.addr[5]);
 			fprintf(stdout,"FCS= %d - ", mpdu_info->mpdu_entries[counter].fcs);
 			fprintf(stdout,"mcs= %d", mpdu_info->mpdu_entries[counter].mcs);
 			fprintf(stdout,"\n");
@@ -284,13 +303,17 @@ void print_chan_info(mac_chan_info* chan_info){
 		n_user = chan_info->num_users;
 		for(counter = 0; counter < n_user; counter++){
 			memcpy(&user_mac.addr[0], &((chan_info->user_entries[counter].user_mac).addr[0]), 6 * sizeof(u8));
-			fprintf(stdout, "user %02d: %02x:%02x:%02x:%02x:%02x:%02x\t mpdus: %d(1st), %d(2nd), %d(3rd)\n",
-					counter,
+			fprintf(stdout, "user %02d: %02x:%02x:%02x:%02x:%02x:%02x\t mpdus: %d(1st), %d(2nd), %d(3rd)\t"
+					        "dur: %d(1st), %d(2nd), %d(3rd)\n",
+					counter + 1,
 					user_mac.addr[0], user_mac.addr[1], user_mac.addr[2],
 					user_mac.addr[3], user_mac.addr[4], user_mac.addr[5],
 					chan_info->user_entries[counter].num_mpdu[0],
 					chan_info->user_entries[counter].num_mpdu[1],
-					chan_info->user_entries[counter].num_mpdu[2]);
+					chan_info->user_entries[counter].num_mpdu[2],
+					chan_info->user_entries[counter].duration[0],
+					chan_info->user_entries[counter].duration[1],
+					chan_info->user_entries[counter].duration[2]);
 		}
 	}
 }
@@ -310,18 +333,27 @@ void print_chan_util(u32 mac_channel, mac_chan_info* chan_info){
 	u16 counter;								// Counter to loop over the users
 	mac_addr user_mac;							// User MAC address
 	u16 user_per_sec = chan_info->num_users;	// Number of users per second
+	u32 tot_mpdu = 0;
+	u16 tot_duration = 0;
 	fprintf(stdout,"-------------Channel Utilization-------------\n");
 	fprintf(stdout,"Channel:            %d\n", mac_channel);
 	fprintf(stdout,"Users/sec:          %d\n", user_per_sec);
+	fprintf(stdout,"---------------------------------------------\n");
+	fprintf(stdout,"User MAC\t\t MPDUs/sec\t Time\t Power\n");
 	// Prints the list of users and the MPDUs per second
 	for(counter = 0; counter < user_per_sec; counter++) {
 		memcpy(&(user_mac.addr[0]), &((chan_info->user_entries[counter].user_mac).addr[0]), 6 * sizeof(u8));
-		fprintf(stdout,"user %02d: %02x:%02x:%02x:%02x:%02x:%02x\t mpdu/s: %d\n", counter+1,
+		tot_mpdu += chan_info->user_entries[counter].avg_mpdus;
+		tot_duration += chan_info->user_entries[counter].avg_duration;
+		fprintf(stdout,"%02x:%02x:%02x:%02x:%02x:%02x\t\t %d\t %d us\t %d dBm\n",
 					user_mac.addr[0], user_mac.addr[1], user_mac.addr[2],
 					user_mac.addr[3], user_mac.addr[4], user_mac.addr[5],
-					chan_info->user_entries[counter].avg_mpdus);
+					chan_info->user_entries[counter].avg_mpdus,
+					chan_info->user_entries[counter].avg_duration,
+					chan_info->user_entries[counter].last_power);
 	}
 	fprintf(stdout,"---------------------------------------------\n");
+	fprintf(stdout,"Total:\t\t %d\t %d\t\n", tot_mpdu, tot_duration);
 }
 
 /**
@@ -434,6 +466,8 @@ void print_users(mac_addr* users, u32 num_users) {
 void generate_mpdu_entries(rx_mpdu_info* mpdu_info, mac_addr* users, u32 num_users){
 	// Multicast mac addr
 	u8 mult_addr [6] = {255, 255, 255, 255, 255, 255};
+	// Power values
+	char pow_val [8] = {-90, -80, -70, -60, -50, -40, -30, -20};
 	// Initialize the array of MPDU entries to zero elements
 	wlan_mac_high_init_mpdu_info(mpdu_info);
 
@@ -444,9 +478,10 @@ void generate_mpdu_entries(rx_mpdu_info* mpdu_info, mac_addr* users, u32 num_use
 		fprintf(stdout,"User index: %d\n", idx+1);
 		memcpy(&((mpdu_info->mpdu_entries[counter_mpdus].src_addr).addr[0]), &((users[idx])), 6 * sizeof(u8));
 		memcpy(&((mpdu_info->mpdu_entries[counter_mpdus].dst_addr).addr[0]), &(mult_addr[0]), 6 * sizeof(u8));
+		mpdu_info->mpdu_entries[counter_mpdus].duration = (u16) random_at_most(500);
 		mpdu_info->mpdu_entries[counter_mpdus].fcs = 1;
 		mpdu_info->mpdu_entries[counter_mpdus].mcs = 3;
-		mpdu_info->mpdu_entries[counter_mpdus].power = -35;
+		mpdu_info->mpdu_entries[counter_mpdus].power = pow_val[random_at_most(7)];
 		mpdu_info->mpdu_entries[counter_mpdus].time_stamp = 100000;
 		mpdu_info->num_elem++;
 	}

@@ -383,43 +383,6 @@ void generate_mpdu_entries(rx_mpdu_info* mpdu_info, mac_addr* users, u32 num_use
 	}
 }
 
-//void generate_mpdu_entries(rx_mpdu_info* mpdu_info, u32 max_users){
-//	// Multicast mac addr
-//	u8 mult_addr [6] = {255, 255, 255, 255, 255, 255};
-//	// Initialize the array of MPDU entries to zero elements
-//	wlan_mac_high_init_mpdu_info(mpdu_info);
-//	// Generates random number of users
-//	u32 num_users = random_at_most(max_users);
-//	fprintf(stdout,"Number random generated users: %d\n", num_users);
-//	if(num_users > 0) {
-//		mac_addr users_mac_addr [num_users];	// Array with user mac addresses
-//		// Generates user mac addresses
-//		u32 counter_users;
-//		for(counter_users = 0; counter_users < num_users; counter_users++) {
-//			generate_mac_addr(&(users_mac_addr[counter_users]));
-//			fprintf(stdout,"user %02d: %02x:%02x:%02x:%02x:%02x:%02x\n", counter_users+1,
-//					users_mac_addr[counter_users].addr[0], users_mac_addr[counter_users].addr[1],users_mac_addr[counter_users].addr[2],
-//					users_mac_addr[counter_users].addr[3], users_mac_addr[counter_users].addr[4],users_mac_addr[counter_users].addr[5]);
-//		}
-//
-//		fprintf(stdout,"List of user index used for each MPDU entry:\n");
-//
-//		u32 counter_mpdus;
-//		u32 idx;
-//		for(counter_mpdus = 0; counter_mpdus < MAX_NUM_MPDU; counter_mpdus++){
-//			idx = random_at_most(num_users-1);
-//			fprintf(stdout,"User: %d\n", idx+1);
-//			memcpy(&((mpdu_info->mpdu_entries[counter_mpdus].src_addr).addr[0]), &((users_mac_addr[idx]).addr[0]), 6 * sizeof(u8));
-//			memcpy(&((mpdu_info->mpdu_entries[counter_mpdus].dst_addr).addr[0]), &(mult_addr[0]), 6 * sizeof(u8));
-//			mpdu_info->mpdu_entries[counter_mpdus].fcs = 1;
-//			mpdu_info->mpdu_entries[counter_mpdus].mcs = 3;
-//			mpdu_info->mpdu_entries[counter_mpdus].power = -35;
-//			mpdu_info->mpdu_entries[counter_mpdus].time_stamp = 100000;
-//			mpdu_info->num_elem++;
-//		}
-//	}
-//}
-
 void generate_mac_addr(mac_addr* mac) {
 	u8 counter;
 	for(counter = 0; counter < 6; counter++) {
